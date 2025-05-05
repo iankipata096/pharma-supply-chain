@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Distributor Dashboard</title>
+    <style>
+        .logout-button {
+    position: absolute;
+    top: 10px;
+    right: 10px; /* ✅ Moves it to the top right */
+    background: #D9534F;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.logout-button:hover {
+    background: #C9302C;
+}
+
+        .welcome-card {
+    width: 90%;
+    max-width: 450px; /* ✅ Smaller size */
+    background: white;
+    padding: 15px; /* ✅ Less padding */
+    margin: 15px auto;
+    text-align: center;
+    border-radius: 12px; /* ✅ Smooth rounded corners */
+    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-card h1 {
+    font-size: 1.8rem; /* ✅ Keep "Welcome, Username" large */
+    margin-bottom: 8px;
+}
+
+.welcome-message {
+    font-size: 0.9rem; /* ✅ Smaller description */
+    font-weight: normal;
+    color: #333;
+    margin-top: 5px;
+}
+
+.encouragement {
+    font-size: 0.85rem; /* ✅ Motivational text */
+    font-weight: bold;
+    color: #0070D2;
+    margin-top: 5px;
+}
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        header {
+            background-color: #0056A6;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+        }
+        nav ul li {
+            margin: 0 15px;
+        }
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        main {
+            padding: 20px;
+        }
+        .popup-form {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background: white;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background: #0056A6;
+            color: white;
+        }
+        .tracking-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Distributor Dashboard</h1>
+        <nav>
+            <ul>
+                <li><a href="homepage.html">Home</a></li>
+                <li><a href="#">Track Shipments</a></li>
+            </ul>
+        </nav>
+    </header>
+    <button class="logout-button" onclick="logout()">Logout</button>
+
+    <div class="welcome-card" id="welcomeCard">
+        <h1>Welcome, <span id="username">User</span>!</h1>
+        <p class="welcome-message">
+            Track shipments, update delivery statuses, and manage pharmaceutical logistics effortlessly.
+        </p>
+        <p class="encouragement">
+            Your work keeps life-saving medicines moving—stay efficient!
+        </p>
+    </div>
+    <main>        
+        <section id="shipment-status">
+            <h3>Products Being Delivered</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Batch Number</th>
+                        <th>Quantity</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="shipmentTable">
+                </tbody>
+            </table>
+        </section>
+
+        <section class="tracking-section">
+            <h3>Product Tracking</h3>
+            <p>Track a specific product in transit.</p>
+            <input type="text" id="trackOrderId" placeholder="Enter Order ID" required>
+            <button onclick="trackProduct()">Track</button>
+            <div id="trackingResult"></div>
+        </section>
+    </main>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const loggedInUser = localStorage.getItem("username"); // ✅ Get username from localStorage
+        
+            if (loggedInUser) {
+                document.getElementById("username").textContent = loggedInUser; // ✅ Display username
+            } else {
+                document.getElementById("username").textContent = "Guest"; // Default if no user found
+            }
+        });
+        </script>
+        <script>
+            function logout() {
+                localStorage.clear(); // ✅ Clears all stored session data
+                alert("You have been logged out.");
+                window.location.href = "distributor login.html"; // ✅ Redirect to login page
+            }
+            </script>
+             <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    if (!localStorage.getItem("username")) {
+                        window.location.href = "distributor login.html"; // ✅ Redirect if no active session
+                    }
+                });
+                </script> 
+                <script>
+                    async function fetchDeliveries() {
+                        try {
+                            const response = await fetch("http://localhost:5000/deliveries");
+                            if (!response.ok) throw new Error("Failed to fetch deliveries");
+                    
+                            const deliveries = await response.json();
+                            const tableBody = document.getElementById("shipmentTable");
+                            tableBody.innerHTML = "";
+                    
+                            deliveries.forEach(order => {
+                                const row = document.createElement("tr");
+                                row.innerHTML = `
+                                    <td>${order.productName}</td>
+                                    <td>${order.batchNo}</td>
+                                    <td>${order.quantity}</td>
+                                    <td>${order.status}</td>
+                                `;
+                                tableBody.appendChild(row);
+                            });
+                        } catch (error) {
+                            console.error("❌ Error fetching deliveries:", error);
+                        }
+                    }
+                    
+                    // ✅ Load deliveries when the page loads
+                    document.addEventListener("DOMContentLoaded", fetchDeliveries);
+                    </script>
+                    
+</body>
+</html>

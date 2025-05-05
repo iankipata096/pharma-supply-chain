@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Distributor Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        .login-container h2 {
+            margin-bottom: 1rem;
+        }
+        .login-container input {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        .login-container button {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #004C97;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .login-container button:hover {
+            background-color: #004C97;
+        }
+        .login-container .links {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        .login-container .links a {
+            color: #007bff;
+            text-decoration: none;
+            margin: 0 5px;
+        }
+        .login-container .links a:hover {
+            text-decoration: none;
+        }
+        #message {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        .home-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px; /* ✅ Places it on the top right */
+    font-size: 24px; /* ✅ Makes the home icon visible */
+    color: #0070D2;
+    text-decoration: none;
+    padding: 10px;
+    transition: 0.3s;
+}
+
+.home-icon:hover {
+    color: #0056A6; /* ✅ Changes color when hovered */
+}
+
+    </style>
+</head>
+<body>
+    <a href="homepage.html" class="home-icon">
+        <i class="fas fa-home"></i>
+    </a>
+    
+    <div class="login-container">
+        <h2>Distributor Login</h2>
+        <form id="loginForm">
+            <input type="text" id="username" name="username" placeholder="Username" required autocomplete="off">
+            <input type="password" id="password" name="password" placeholder="Password" required autocomplete="off">
+            <button type="submit">Login</button>
+        </form>
+        <div id="message"></div>
+        <div class="links">
+            <p>Not registered? <a href="distributor reg.html">Please sign up</a></p>
+        </div>
+    </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+        
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+        
+            const response = await fetch('http://localhost:5000/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+        
+            const data = await response.json();
+        
+            if (response.ok) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('role', data.role);
+                localStorage.setItem('username', username); // ✅ Store username in localStorage
+
+                
+                if (data.role === 'distributor') {
+                    window.location.href = 'distributordash.html';
+                } else {
+                    document.getElementById('message').innerText = "Access denied!";
+                    document.getElementById('message').style.color = 'red';
+                }
+            } else {
+                document.getElementById('message').innerText = "Wrong username or password!";
+                document.getElementById('message').style.color = 'red';
+            }
+        });
+        </script>        
+</body>
+</html>

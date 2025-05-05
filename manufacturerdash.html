@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manufacturer Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; }
+        .logout-button {
+    position: absolute;
+    top: 10px;
+    right: 10px; /* ✅ Moves it to the top right */
+    background: #D9534F;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.logout-button:hover {
+    background: #C9302C;
+}
+
+        .welcome-card {
+    width: 90%;
+    max-width: 450px; /* ✅ Smaller size */
+    background: white;
+    padding: 15px; /* ✅ Less padding */
+    margin: 15px auto;
+    text-align: center;
+    border-radius: 12px; /* ✅ Smooth rounded corners */
+    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-card h1 {
+    font-size: 1.8rem; /* ✅ Keep "Welcome, Username" large */
+    margin-bottom: 8px;
+}
+
+.welcome-message {
+    font-size: 0.9rem; /* ✅ Smaller description */
+    font-weight: normal;
+    color: #333;
+    margin-top: 5px;
+}
+
+.encouragement {
+    font-size: 0.85rem; /* ✅ Motivational text */
+    font-weight: bold;
+    color: #0070D2;
+    margin-top: 5px;
+}
+
+        header { background-color: #0056A6; color: white; padding: 10px; text-align: center; }
+        main { padding: 20px; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        table, th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background: #0056A6; color: white; }
+        .form-container { background: white; padding: 20px; margin-bottom: 20px; }
+        .home-link { display: block; color: white; text-decoration: none; font-weight: bold; margin: 15px auto; text-align: center; }
+        .home-link:hover { text-decoration: none; color: white; }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Manufacturer Dashboard</h1>
+        <a href="homepage.html" class="home-link">Home</a>
+    </header>
+    <button class="logout-button" onclick="logout()">Logout</button>
+    <div class="welcome-card" id="welcomeCard">
+        <h1>Welcome, <span id="username">User</span>!</h1>
+        <p class="welcome-message">
+            Monitor and manage your pharmaceutical inventory efficiently.  
+            Track orders, update stock, and ensure smooth distribution.  
+        </p>
+        <p class="encouragement">
+            Your production keeps the industry moving—keep innovating!
+        </p>
+    </div>    
+    <main>
+        <section class="form-container">
+            <h2>Add New Product</h2>
+            <form id="manufactureraddProductForm">
+                <input type="text" id="productName" placeholder="Product Name" required>
+                <input type="text" id="batchNo" placeholder="Batch No" required>
+                <input type="date" id="expiryDate" required>
+                <input type="number" id="quantity" placeholder="Quantity" required>
+                <button type="submit">Add Product</button>
+            </form>
+        </section>
+        
+        <h2>Inventory</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Batch No</th>
+                    <th>Expiry Date</th>
+                    <th>Quantity</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="manufacturerinventoryTable"></tbody>
+        </table>
+        <h2>Pending Orders</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Batch No</th>
+                    <th>Expiry Date</th>
+                    <th>Quantity</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="pendingOrdersTable"></tbody>
+        </table>
+        <section id="completed-orders">
+            <h2>Completed Orders</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Batch Number</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody id="completedOrdersTable">
+                    <!-- Completed orders will be inserted here -->
+                </tbody>
+            </table>
+        </section>
+        
+    </main>
+
+    <script>
+        async function fetchInventory() {
+            const response = await fetch("http://localhost:5000/inventory");
+            const products = await response.json();
+            const tableBody = document.getElementById("manufacturerinventoryTable");
+            tableBody.innerHTML = "";
+
+            products.forEach(product => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${product.productName}</td>
+                    <td>${product.batchNo}</td>
+                    <td>${product.expiryDate}</td>
+                    <td>${product.quantity}</td>
+                    <td><button onclick="deleteProduct('${product._id}')">Delete</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        document.getElementById("manufactureraddProductForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+    
+    const productName = document.getElementById("productName").value;
+    const batchNo = document.getElementById("batchNo").value;
+    const expiryDate = document.getElementById("expiryDate").value;
+    const quantity = document.getElementById("quantity").value;
+
+    const response = await fetch("http://localhost:5000/inventory/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productName, batchNo, expiryDate, quantity })
+    });
+
+    if (response.ok) {
+        fetchInventory(); // Refresh inventory
+    } else {
+        alert("Error adding product!");
+    }
+});
+
+
+        async function deleteProduct(productId) {
+            await fetch(`http://localhost:5000/inventory/delete/${productId}`, { method: "DELETE" });
+            fetchInventory();
+        }
+
+        document.addEventListener("DOMContentLoaded", fetchInventory);
+    </script>
+     <script>
+        const ws = new WebSocket("ws://localhost:8090");
+        
+        ws.onmessage = function(event) {
+            const message = JSON.parse(event.data);
+            
+            if (message.type === "new_order") {
+                addPendingOrder(message.data);
+            }
+        };
+    </script>
+        <script>
+            async function fetchPendingOrders() {
+                try {
+                    const response = await fetch("http://localhost:5000/orders");
+                    const orders = await response.json();
+                    const tableBody = document.getElementById("pendingOrdersTable");
+                    tableBody.innerHTML = "";
+                    orders.forEach(order => addPendingOrder(order));
+                } catch (error) {
+                    console.error("❌ Error fetching pending orders:", error);
+                }
+            }
+            
+            function addPendingOrder(order) {
+                const tableBody = document.getElementById("pendingOrdersTable");
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${order.productName}</td>
+                    <td>${order.batchNo}</td>
+                    <td>${order.expiryDate}</td>
+                    <td>${order.quantity}</td>
+                    <td><button onclick="completeOrder('${order._id}')">Complete</button></td>
+                `;
+                tableBody.appendChild(row);
+            }
+            
+            async function completeOrder(orderId) {
+                try {
+                    const response = await fetch(`http://localhost:5000/orders/complete/${orderId}`, {
+                        method: "DELETE",
+                        headers: { "Content-Type": "application/json" }
+                    });
+                    if (!response.ok) throw new Error("Failed to complete order");
+                    fetchPendingOrders();
+                } catch (error) {
+                    console.error("❌ Error completing order:", error);
+                }
+            }
+            
+            document.addEventListener("DOMContentLoaded", () => {
+                fetchPendingOrders();
+                const loggedInUser = localStorage.getItem("username");
+                document.getElementById("username").textContent = loggedInUser || "Guest";
+            });
+            
+            function logout() {
+                localStorage.clear();
+                alert("You have been logged out.");
+                window.location.href = "manufacturer login.html";
+            }
+        </script>
+        <script>
+            async function fetchCompletedOrders() {
+                try {
+                    const response = await fetch("http://localhost:5000/deliveries");
+                    if (!response.ok) throw new Error("Failed to fetch completed orders");
+            
+                    const deliveries = await response.json();
+                    const tableBody = document.getElementById("completedOrdersTable");
+                    tableBody.innerHTML = "";
+            
+                    deliveries.forEach(order => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${order.productName}</td>
+                            <td>${order.batchNo}</td>
+                            <td>${order.quantity}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } catch (error) {
+                    console.error("❌ Error fetching completed orders:", error);
+                }
+            }
+            
+            // ✅ Load completed orders when the page loads
+            document.addEventListener("DOMContentLoaded", fetchCompletedOrders);
+            </script>
+            
+</body>
+</html>

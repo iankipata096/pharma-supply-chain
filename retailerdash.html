@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Retailer Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        header {
+            background-color: #0056A6;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        .logout-button {
+    position: absolute;
+    top: 10px;
+    right: 10px; /* ✅ Moves it to the top right */
+    background: #D9534F;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.logout-button:hover {
+    background: #C9302C;
+}
+
+        .welcome-card {
+    width: 90%;
+    max-width: 450px; /* Reduced width for a compact look */
+    background: white;
+    padding: 15px; /* Reduced padding */
+    margin: 15px auto;
+    text-align: center;
+    border-radius: 12px; /* Slightly smaller rounded corners */
+    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-card h1 {
+    font-size: 1.8rem; /* Keep "Welcome, Username" large */
+    margin-bottom: 8px;
+}
+
+.welcome-message {
+    font-size: 0.9rem; /* Smaller description */
+    font-weight: normal;
+    color: #333;
+    margin-top: 5px;
+}
+
+.encouragement {
+    font-size: 0.85rem; /* Smaller encouragement text */
+    font-weight: bold;
+    color: #0070D2;
+    margin-top: 5px;
+}
+
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+        }
+        nav ul li {
+            margin: 0 15px;
+        }
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        main {
+            padding: 20px;
+        }
+        .order-summary {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        .order-card {
+            background-color: #fff;
+            padding: 20px;
+            width: 30%;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .order-card h3 {
+            font-size: 20px;
+            color: #333;
+        }
+        .order-card p {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0056A6;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 60%;
+            margin: 0 auto;
+        }
+        form input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        form button {
+            background-color: #0056A6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        form button:hover {
+            background-color: #0056A6;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background: white;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background: #0056A6;
+            color: white;
+        }
+        .popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999; }
+        .popup-form { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); z-index: 1000; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Retailer Dashboard</h1>
+        <nav>
+            <ul>
+                <li><a href="homepage.html">Home</a></li>
+                <li><a href="#">Place Order</a></li>
+                <li><a href="#">Track Delivery</a></li>
+            </ul>
+        </nav>
+    </header>
+    <button class="logout-button" onclick="logout()">Logout</button>
+
+    <div class="welcome-card" id="welcomeCard">
+        <h1>Welcome, <span id="username">User</span>!</h1>
+        <p class="welcome-message">
+            This is your Retailer Dashboard, where you can place orders, track inventory,  
+            and manage your pharmaceutical supply efficiently.  
+        </p>
+        <p class="encouragement">
+            Keep up the great work! Reliable healthcare starts with you.
+        </p>
+    </div>
+    
+
+    <main>
+        <button onclick="openPopup()">Add Product</button>
+        
+        <div id="popupOverlay" class="popup-overlay" onclick="closePopup()"></div>
+        <div id="popupForm" class="popup-form">
+            <h3>Add a New Product</h3>
+            <form id="retaileraddProductForm">
+                <input type="text" id="popupProductName" placeholder="Product Name" required>
+                <input type="text" id="popupBatchNo" placeholder="Batch Number" required>
+                <input type="date" id="popupExpiryDate" required>
+                <input type="number" id="popupQuantity" placeholder="Quantity" required min="1">
+                <button type="submit">Submit</button>
+                <button type="button" onclick="closePopup()">Cancel</button>
+            </form>
+        </div>
+            <table>
+                <h2>Inventory</h2>
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Batch No</th>
+                        <th>Expiry Date</th>
+                        <th>Quantity</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="retailerinventoryTable">
+                    <!-- Added products will appear here -->
+                </tbody>
+            </table>
+        </section>
+        <br>
+        <br>
+        <div class="action-buttons">
+            <button onclick="openOrderPopup()">Place Order</button>
+        </div>
+        
+        <div id="orderPopupOverlay" class="popup-overlay" onclick="closeOrderPopup()"></div>
+        <div id="orderPopupForm" class="popup-form">
+            <h3>Place a New Order</h3>
+            <form id="placeOrderForm">
+                <input type="text" id="orderProductName" placeholder="Product Name" required>
+                <input type="text" id="orderBatchNo" placeholder="Batch Number" required>
+                <input type="date" id="orderExpiryDate" required>
+                <input type="number" id="orderQuantity" placeholder="Quantity" required min="1">
+                <button type="submit">Submit Order</button>
+                <button type="button" onclick="closeOrderPopup()">Cancel</button>
+            </form>
+        </div>
+        <h2>Placed orders</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Batch No</th>
+                    <th>Expiry Date</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody id="ordersTable"></tbody>
+        </table>
+        
+        <section id="available-products">
+            <h2>Available Products from Manufacturers</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Batch No</th>
+                        <th>Expiry Date</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody id="availableProductsTable">
+                    <!-- Products will be inserted here dynamically -->
+                </tbody>
+            </table>
+        </section> 
+    </main>   
+    <script>
+        async function fetchInventory() {
+    const response = await fetch("http://localhost:5000/products"); 
+    const products = await response.json();
+    const tableBody = document.getElementById("retailerinventoryTable"); 
+    tableBody.innerHTML = "";
+
+    products.forEach(product => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${product.productName}</td>
+            <td>${product.batchNo}</td>
+            <td>${product.expiryDate}</td>
+            <td>${product.quantity}</td>
+            <td><button onclick="deleteProduct('${product._id}')">Delete</button></td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+async function deleteProduct(productId) {
+    const response = await fetch(`http://localhost:5000/products/delete/${productId}`, { method: "DELETE" });
+
+    if (response.ok) {
+        fetchInventory(); // ✅ Refresh table after deleting a product
+    } else {
+        alert("Error deleting product!");
+    }
+}
+
+
+        document.addEventListener("DOMContentLoaded", function() {
+            closePopup();
+            closeOrderPopup();
+            fetchInventory();
+            fetchOrders();
+        });
+
+        function openPopup() {
+            document.getElementById("popupOverlay").style.display = "block";
+            document.getElementById("popupForm").style.display = "block";
+        }
+
+        function closePopup() {
+            document.getElementById("popupOverlay").style.display = "none";
+            document.getElementById("popupForm").style.display = "none";
+        }
+
+        function openOrderPopup() {
+            document.getElementById("orderPopupOverlay").style.display = "block";
+            document.getElementById("orderPopupForm").style.display = "block";
+        }
+
+        function closeOrderPopup() {
+            document.getElementById("orderPopupOverlay").style.display = "none";
+            document.getElementById("orderPopupForm").style.display = "none";
+        }
+
+        document.getElementById("retaileraddProductForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const productName = document.getElementById("popupProductName").value;
+            const batchNo = document.getElementById("popupBatchNo").value;
+            const expiryDate = document.getElementById("popupExpiryDate").value;
+            const quantity = document.getElementById("popupQuantity").value;
+
+            const response = await fetch("http://localhost:5000/products/add", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ productName, batchNo, expiryDate, quantity })
+            });
+
+            if (response.ok) {
+                closePopup();
+                fetchInventory();
+            } else {
+                alert("Error adding product!");
+            }
+        });
+
+        document.getElementById("placeOrderForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const productName = document.getElementById("orderProductName").value;
+            const batchNo = document.getElementById("orderBatchNo").value;
+            const expiryDate = document.getElementById("orderExpiryDate").value;
+            const quantity = document.getElementById("orderQuantity").value;
+
+            const response = await fetch("http://localhost:5000/orders/add", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ productName, batchNo, expiryDate, quantity })
+            });
+
+            if (response.ok) {
+                closeOrderPopup();
+                fetchOrders();
+            } else {
+                alert("Error placing order!");
+            }
+        });
+        async function fetchAvailableProducts() {
+    try {
+        const response = await fetch("http://localhost:5000/inventory"); // Fetch manufacturer inventory
+        if (!response.ok) throw new Error("Failed to fetch manufacturer inventory");
+
+        const products = await response.json();
+        console.log("✅ Manufacturer Inventory Data:", products); // Debugging log
+
+        const tableBody = document.getElementById("availableProductsTable");
+        tableBody.innerHTML = ""; // Clear previous data
+
+        if (products.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="5">No products available from manufacturers.</td></tr>`;
+        } else {
+            products.forEach(product => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${product.productName}</td>
+                    <td>${product.batchNo}</td>
+                    <td>${product.expiryDate}</td>
+                    <td>${product.quantity}</td>
+                    <td><button onclick="requestProduct('${product._id}')">Request Order</button></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+    } catch (error) {
+        console.error("❌ Error fetching available products:", error);
+    }
+}
+
+// Fetch available products when the page loads
+document.addEventListener("DOMContentLoaded", fetchAvailableProducts);
+    </script>   
+   <script>
+    const ws = new WebSocket("ws://localhost:8090");
+    
+    ws.onmessage = function(event) {
+        const message = JSON.parse(event.data);
+    
+        // ✅ If a new product is added by the manufacturer, update "Available Products" table
+        if (message.type === "new_product") {
+            addProductToAvailableTable(message.data);
+        }
+    
+        // ✅ If a new order is placed by the retailer, update the "Placed Orders" table
+        if (message.type === "new_order") {
+            addOrderToPlacedOrdersTable(message.data);
+        }
+    };
+    
+    // ✅ Fetch & Display Available Products from Manufacturers
+    async function fetchAvailableProducts() {
+        try {
+            const response = await fetch("http://localhost:5000/inventory");
+            if (!response.ok) throw new Error("Failed to fetch manufacturer inventory");
+    
+            const products = await response.json();
+            console.log("✅ Manufacturer Inventory Data:", products);
+    
+            const tableBody = document.getElementById("availableProductsTable");
+            tableBody.innerHTML = ""; // Clear previous data
+    
+            if (products.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="4">No products available from manufacturers.</td></tr>`;
+            } else {
+                products.forEach(product => addProductToAvailableTable(product));
+            }
+        } catch (error) {
+            console.error("❌ Error fetching available products:", error);
+        }
+    }
+    
+    // ✅ Function to Add a Product to the "Available Products" Table
+    function addProductToAvailableTable(product) {
+        const tableBody = document.getElementById("availableProductsTable");
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${product.productName}</td>
+            <td>${product.batchNo}</td>
+            <td>${product.expiryDate}</td>
+            <td>${product.quantity}</td>
+        `;
+        tableBody.appendChild(row);
+    }
+    
+    // ✅ Fetch & Display Placed Orders When Page Loads
+    async function fetchOrders() {
+        try {
+            const response = await fetch("http://localhost:5000/orders");
+            if (!response.ok) throw new Error("Failed to fetch placed orders");
+    
+            const orders = await response.json();
+            console.log("✅ Placed Orders Data:", orders);
+    
+            const tableBody = document.getElementById("ordersTable");
+            tableBody.innerHTML = ""; // Clear previous data
+    
+            if (orders.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="4">No orders placed yet.</td></tr>`;
+            } else {
+                orders.forEach(order => addOrderToPlacedOrdersTable(order));
+            }
+        } catch (error) {
+            console.error("❌ Error fetching placed orders:", error);
+        }
+    }
+    
+    // ✅ Function to Add an Order to the "Placed Orders" Table
+    function addOrderToPlacedOrdersTable(order) {
+        const tableBody = document.getElementById("ordersTable");
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${order.productName}</td>
+            <td>${order.batchNo}</td>
+            <td>${order.expiryDate}</td>
+            <td>${order.quantity}</td>
+        `;
+        tableBody.appendChild(row);
+    }
+    
+    // ✅ Fetch data when the page loads
+    document.addEventListener("DOMContentLoaded", () => {
+        fetchAvailableProducts(); // Load Manufacturer Products
+        fetchOrders(); // Load Retailer Placed Orders
+    });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const loggedInUser = localStorage.getItem("username"); // ✅ Get username from localStorage
+        
+            if (loggedInUser) {
+                document.getElementById("username").textContent = loggedInUser; // ✅ Display username
+            } else {
+                document.getElementById("username").textContent = "Guest"; // Default if no user found
+            }
+        });
+        </script>
+        <script>
+            function logout() {
+                localStorage.clear(); // ✅ Clears all stored session data
+                alert("You have been logged out.");
+                window.location.href = "retailer login.html"; // ✅ Redirect to login page
+            }
+            </script>
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    if (!localStorage.getItem("username")) {
+                        window.location.href = "retailer login.html"; // ✅ Redirect if no active session
+                    }
+                });
+                </script>    
+</body>
+</html>
